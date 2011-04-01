@@ -22,7 +22,7 @@
 	<string>2</string>
 	<key>PlexMediaContainer</key>
 	<string>Flash</string>
-	<key>PlexPluginDebug</key>
+	<key>PlexPluginConsoleLogging</key>
 	<string>0</string>
 	<key>PlexPluginMode</key>
 	<string>AlwaysOn</string>

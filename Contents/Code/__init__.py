@@ -1,88 +1,62 @@
-import re, random
-
-
-
+import re
 
 ####################################################################################################
 
-PLUGIN_PREFIX     = "/video/USA"
-NAMESPACE   = {'media':'http://search.yahoo.com/mrss/'}
-
-USA__URL                     = "http://www.usanetwork.com"
 USA_FULL_EPISODES_SHOW_LIST = "http://video.usanetwork.com/"
-USA_EP_URL                  = "http://www.usanetwork.com/series/"
-usathumb                    = "icon-default.jpg"
-usaart                      = "art-default.jpg"
+USA_EP_URL = "http://www.usanetwork.com/series/"
+NAMESPACE = {'media':'http://search.yahoo.com/mrss/'}
 
-
-CACHE_INTERVAL              = 3600
-DEBUG                       = False
+ICON = "icon-default.jpg"
+ART  = "art-default.jpg"
 
 ####################################################################################################
 
 def Start():
-  Plugin.AddPrefixHandler(PLUGIN_PREFIX, MainMenu, "USA Network","icon-default.jpg", "art-default.jpg")
-  Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
+    Plugin.AddPrefixHandler("/video/usanetwork", MainMenu, "USA Network", ICON, ART)
+    Plugin.AddViewGroup("InfoList", viewMode="InfoList", mediaType="items")
 
+    MediaContainer.art = R(ART)
+    MediaContainer.title1 = "USA Network"
+    DirectoryItem.thumb = R(ICON)
+    DirectoryItem.viewGroup = "InfoList"
+    WebVideoItem.thumb = R(ICON)
 
+    HTTP.CacheTime = CACHE_1HOUR
+    HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_6; en-us) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27'
 
-  MediaContainer.art        =R(usaart)
-  DirectoryItem.thumb       =R(usathumb)
-  WebVideoItem.thumb        =R(usathumb)
-
-####################################################################################################
-#def MainMenu():
-#    dir = MediaContainer(mediaType='video') 
-#
-#    dir.Append(Function(DirectoryItem(all_shows, "All Shows"), pageUrl = #USA_FULL_EPISODES_SHOW_LIST))
-#    return dir
-    
 ####################################################################################################
 def MainMenu():
-    pageUrl=USA_FULL_EPISODES_SHOW_LIST
-    dir = MediaContainer(mediaType="video")
-    Log(pageUrl)
-    page=HTTP.Request(pageUrl)
-    Log(page)
-    content = HTML.ElementFromString(page)
-    Log("===========================")
-    for item in content.xpath('//div[@id="find_it_branch_Full_Episodes"]//ul/li'):
-      titleUrl = item.xpath("a")[0].get('href')
-      page = HTTP.Request(titleUrl)
-      Log(titleUrl)
-      page=str(page)
-      Log(re.compile('rssURL = \"(.+?)\";').findall(page))
-      titleUrl2=re.compile('var _rssURL = "(.+?)";').findall(page)[0].replace('%26','&')
+    dir = MediaContainer()
+    content = HTML.ElementFromURL(USA_FULL_EPISODES_SHOW_LIST, errors='ignore')
 
-      image =""
-      title = item.xpath("a")[0].text
-      titleUrl2=titleUrl2 + "&networkid=103"
-      if titleUrl2.count("34855") == 0: # excludes monk which is no longer full episodes
-        Log(title)
-        Log(titleUrl2)
-        dir.Append(Function(DirectoryItem(VideoPage, title), pageUrl = titleUrl2, dummyUrl=titleUrl))
-    Log("===========================")
-    return dir 
+    for item in content.xpath('//div[@id="find_it_branch_Full_Episodes"]//ul/li'):
+        title = item.xpath("./a")[0].text.strip()
+        titleUrl = item.xpath("./a")[0].get('href')
+
+        page = HTTP.Request(titleUrl).content
+        titleUrl2 = re.compile('var _rssURL = "(.+?)";').findall(page)[0].replace('%26','&')
+
+        titleUrl2 = titleUrl2 + "&networkid=103"
+        if titleUrl2.count("34855") == 0: # excludes monk which is no longer full episodes
+            dir.Append(Function(DirectoryItem(VideoPage, title), pageUrl = titleUrl2, dummyUrl=titleUrl))
+
+    return dir
 
 ####################################################################################################
 def VideoPage(sender, pageUrl, dummyUrl):
     dir = MediaContainer(title2=sender.itemTitle)
-    content = XML.ElementFromURL(pageUrl).xpath("//item")
+    content = XML.ElementFromURL(pageUrl, errors='ignore')
 
-    for item in content:
-      try:
-        vidUrl = item.xpath('./media:content/media:player',namespaces= NAMESPACE)[0].get('url')
- 
-        vidUrl=vidUrl.replace("&dst=rss||","")
-        vidUrl=vidUrl.replace("http://video.nbcuni.com/player/?id=",dummyUrl + "index.html?id=")
-        title = item.xpath("title")[0].text
+    for item in content.xpath("//item"):
+        try:
+            vidUrl = item.xpath('./media:content/media:player', namespaces=NAMESPACE)[0].get('url')
 
-        #subtitle = Datetime.ParseDate(item.xpath('pubDate')[0].text).strftime('%a %b %d, %Y')
-        #summary = item.xpath('description')[0].text.strip()
-        #summary = summary[summary.find('>')+1:].strip()
-        thumb = item.xpath('./media:content/media:thumbnail', namespaces=NAMESPACE)[0].get('url')
+            vidUrl=vidUrl.replace("&dst=rss||","")
+            vidUrl=vidUrl.replace("http://video.nbcuni.com/player/?id=", dummyUrl + "index.html?id=")
+            title = item.xpath("title")[0].text
 
-        dir.Append(WebVideoItem(vidUrl, title=title))
-      except:
-        pass
+            dir.Append(WebVideoItem(vidUrl, title=title))
+        except:
+            pass
+
     return dir
