@@ -1,20 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <site site="http://www.usanetwork.com"
-	    plugin="http://www.usanetwork.com/outlet/rewind_as3.swf"
-			initialState="playing"
-			version="1.0">
-	
-	
+	plugin="http://www.usanetwork.com/outlet/rewind_as3.swf"
+	initialState="playing"
+	version="1.0">
+
 	<crop x="24" y="18" width="672" height="378" />
-	
+
 	<seekbar type="simple">
 		<start x="112" y="410" />
 		<end   x="522" y="410" />
 		<played>
-				<color rgb="99ccgg" />
+			<color rgb="99ccgg" />
 		</played>
 	</seekbar>
-	
+
 	<!-- PLAYING -->
 	<state name="playing">
 		<event>
@@ -26,7 +25,7 @@
 				<goto state="paused" />
 			</action>
 		</event>
-		
+
 		<!-- Video ends -->
 		<event>
 			<condition>
@@ -37,7 +36,7 @@
 			</action>
 		</event>
 	</state>
-	
+
 	<!-- PAUSED -->
 	<state name="paused">
 		<event>

@@ -21,9 +21,11 @@
 	<key>PlexFrameworkVersion</key>
 	<string>2</string>
 	<key>PlexMediaContainer</key>
-	<string>Flash</string>
+	<array>
+		<string>Flash</string>
+	</array>
 	<key>PlexPluginConsoleLogging</key>
-	<string>0</string>
+	<string>1</string>
 	<key>PlexPluginMode</key>
 	<string>AlwaysOn</string>
 </dict>
