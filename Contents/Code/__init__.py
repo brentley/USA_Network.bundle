@@ -3,8 +3,6 @@ EPISODE_FEED = "http://feed.theplatform.com/f/OyMl-B/8IyhuVgUXDd_/?&form=json&fi
 
 ####################################################################################################
 
-USA_FULL_EPISODES_SHOW_LIST = 'http://video.usanetwork.com/'
-
 ICON = 'icon-default.jpg'
 ART  = 'art-default.jpg'
 
@@ -22,21 +20,17 @@ def Start():
 
 ####################################################################################################
 def MainMenu():
-    dir = MediaContainer()
-    content = HTML.ElementFromURL(USA_FULL_EPISODES_SHOW_LIST, errors='ignore')
+    oc = MediaContainer()
+    showlist = JSON.ObjectFromURL(SHOW_LIST)
 
-    for item in content.xpath('//div[@id="find_it_branch_Full_Episodes"]//ul/li'):
-        title = item.xpath('./a')[0].text.strip()
-        titleUrl = item.xpath('./a')[0].get('href')
+    for show in showlist:
+        if "Series/" in show['plcategory$fullTitle']:
+            title = show['title']
+        else:
+            continue
+        oc.add(DirectoryObject(key=Callback(EpisodesPage, title), title=title))
 
-        page = HTTP.Request(titleUrl).content
-        titleUrl2 = re.compile('var _rssURL = "(.+?)";').findall(page)[0].replace('%26', '&')
-
-        titleUrl2 = titleUrl2 + '&networkid=103'
-        if titleUrl2.count('34855') == 0: # excludes monk which is no longer full episodes
-            dir.Append(Function(DirectoryItem(VideoPage, title), pageUrl=titleUrl2, dummyUrl=titleUrl))
-
-    return dir
+    return oc
 
 ####################################################################################################
 def VideoPage(sender, pageUrl, dummyUrl):
