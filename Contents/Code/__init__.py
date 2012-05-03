@@ -21,9 +21,9 @@ def Start():
 ####################################################################################################
 def MainMenu():
     oc = MediaContainer()
-    showlist = JSON.ObjectFromURL(SHOW_LIST)
+    show_list = JSON.ObjectFromURL(SHOW_LIST)
 
-    for show in showlist:
+    for show in show_list['entries']:
         if "Series/" in show['plcategory$fullTitle']:
             title = show['title']
         else:
@@ -33,19 +33,39 @@ def MainMenu():
     return oc
 
 ####################################################################################################
-def VideoPage(sender, pageUrl, dummyUrl):
-    dir = MediaContainer(title2=sender.itemTitle)
-    content = XML.ElementFromURL(pageUrl, errors='ignore')
+def EpisodesPage(title):
+    oc = ObjectContainer(title2=title)
+    episode_list  JSON.ObjectFromURL(EPISODE_FEED % StringQuote(title))
+    
+    for episode in episode_list['entries']:
+        video_title = episode['title']
+        summary = episode['description']
+        show = title
+        thumbs = SortImages(episode['media$thumbnails'])
+        duration = int(float(episode['media$content'][0]['plfile$duration'])*1000)
+        video_url = ChooseVideoURL(episode['media$content'])
+        oc.add(EpisodeObject(url=video_url, title=video_title, show=show, summary=summary,
+            thumb=Resource.ContentsOfURLWithFallback(url=thumbs, fallback=ICON)))
+    
+    return oc
+        
+####################################################################################################
+def SortImages(images=[]):
+    
+    sorted_thumbs = sorted(images, key=lambda thumb : int(thumb['height']), reverse=True)
+    thumb_list = []
+    for thumb in sorted_thumbs:
+        thumb_list.append(thumb['url'])
 
-    for item in content.xpath('//item'):
-        try:
-            vidUrl = item.xpath('./media:content/media:player', namespaces=NAMESPACE)[0].get('url')
-            vidUrl = vidUrl.replace('&dst=rss||', '')
-            vidUrl = vidUrl.replace('http://video.nbcuni.com/player/?id=', dummyUrl + 'index.html?id=')
-            title = item.xpath('./title')[0].text.strip()
-
-            dir.Append(WebVideoItem(vidUrl, title=title))
-        except:
-            pass
-
-    return dir
+    return thumb_list
+    
+####################################################################################################
+def ChooseVideoURL(videos=[]):
+    url = ''
+    for video in videos:
+        if video['plfile$format'] == "MPEG4":
+            url = video['plfile$url']
+            break
+        else:
+            continue
+    return url
