@@ -1,9 +1,9 @@
-import re
+SHOW_LIST = "http://feed.theplatform.com/f/OyMl-B/PleQEkKucpUm/categories?&form=json&fields=order,title,fullTitle,label,:smallBannerUrl,:largeBannerUrl&fileFields=duration,url,width,height&sort=order"
+EPISODE_FEED = "http://feed.theplatform.com/f/OyMl-B/8IyhuVgUXDd_/?&form=json&fields=guid,title,description,:subtitle,content,thumbnails,categories,:fullEpisode&fileFields=duration,url,width,height,contentType,fileSize,format&byCategories=Series/%s&byCustomValue={fullEpisode}{true}&count=true"
 
 ####################################################################################################
 
 USA_FULL_EPISODES_SHOW_LIST = 'http://video.usanetwork.com/'
-NAMESPACE = {'media':'http://search.yahoo.com/mrss/'}
 
 ICON = 'icon-default.jpg'
 ART  = 'art-default.jpg'
@@ -12,13 +12,10 @@ ART  = 'art-default.jpg'
 
 def Start():
     Plugin.AddPrefixHandler('/video/usanetwork', MainMenu, 'USA Network', ICON, ART)
-    Plugin.AddViewGroup('InfoList', viewMode='InfoList', mediaType='items')
-
-    MediaContainer.art = R(ART)
-    MediaContainer.title1 = 'USA Network'
-    DirectoryItem.thumb = R(ICON)
-    DirectoryItem.viewGroup = 'InfoList'
-    WebVideoItem.thumb = R(ICON)
+    
+    ObjectContainer.art = R(ART)
+    ObjectContainer.title1 = 'USA Network'
+    DirectoryObject.thumb = R(ICON)
 
     HTTP.CacheTime = CACHE_1HOUR
     HTTP.Headers['User-Agent'] = 'Mozilla/5.0 (Macintosh; U; Intel Mac OS X 10_6_6; en-us) AppleWebKit/533.20.25 (KHTML, like Gecko) Version/5.0.4 Safari/533.20.27'
