@@ -20,7 +20,7 @@ def Start():
 
 ####################################################################################################
 def MainMenu():
-    oc = MediaContainer()
+    oc = ObjectContainer()
     show_list = JSON.ObjectFromURL(SHOW_LIST)
 
     for show in show_list['entries']:
@@ -28,14 +28,14 @@ def MainMenu():
             title = show['title']
         else:
             continue
-        oc.add(DirectoryObject(key=Callback(EpisodesPage, title), title=title))
+        oc.add(DirectoryObject(key=Callback(EpisodesPage, title=title), title=title))
 
     return oc
 
 ####################################################################################################
 def EpisodesPage(title):
     oc = ObjectContainer(title2=title)
-    episode_list  JSON.ObjectFromURL(EPISODE_FEED % StringQuote(title))
+    episode_list = JSON.ObjectFromURL(EPISODE_FEED % String.Quote(title))
     
     for episode in episode_list['entries']:
         video_title = episode['title']
@@ -47,15 +47,18 @@ def EpisodesPage(title):
         oc.add(EpisodeObject(url=video_url, title=video_title, show=show, summary=summary,
             thumb=Resource.ContentsOfURLWithFallback(url=thumbs, fallback=ICON)))
     
+    if len(oc) == 0:
+        return ObjectContainer(header="Empty", message="No Episodes found.")
+    
     return oc
         
 ####################################################################################################
 def SortImages(images=[]):
     
-    sorted_thumbs = sorted(images, key=lambda thumb : int(thumb['height']), reverse=True)
+    sorted_thumbs = sorted(images, key=lambda thumb : int(thumb['plfile$height']), reverse=True)
     thumb_list = []
     for thumb in sorted_thumbs:
-        thumb_list.append(thumb['url'])
+        thumb_list.append(thumb['plfile$url'])
 
     return thumb_list
     
