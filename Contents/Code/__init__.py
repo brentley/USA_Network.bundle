@@ -3,7 +3,7 @@ EPISODE_FEED = "http://feed.theplatform.com/f/OyMl-B/8IyhuVgUXDd_/?&form=json&fi
 
 ####################################################################################################
 
-ICON = 'icon-default.jpg'
+ICON = 'icon-default.png'
 ART  = 'art-default.jpg'
 
 ####################################################################################################
