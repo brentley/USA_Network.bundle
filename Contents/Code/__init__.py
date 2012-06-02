@@ -1,5 +1,6 @@
 SHOW_LIST = "http://feed.theplatform.com/f/OyMl-B/PleQEkKucpUm/categories?&form=json&fields=order,title,fullTitle,label,:smallBannerUrl,:largeBannerUrl&fileFields=duration,url,width,height&sort=order"
 EPISODE_FEED = "http://feed.theplatform.com/f/OyMl-B/8IyhuVgUXDd_/?&form=json&fields=guid,title,description,:subtitle,content,thumbnails,categories,:fullEpisode&fileFields=duration,url,width,height,contentType,fileSize,format&byCategories=Series/%s&byCustomValue={fullEpisode}{true}&count=true"
+VIDEO_URL = "http://www.usanetwork.com/videos/%s/vid:%s"
 
 ####################################################################################################
 
@@ -43,7 +44,7 @@ def EpisodesPage(title):
         show = title
         thumbs = SortImages(episode['media$thumbnails'])
         duration = int(float(episode['media$content'][0]['plfile$duration'])*1000)
-        video_url = ChooseVideoURL(episode['media$content'])
+        video_url = VIDEO_URL % (String.Quote(title), episode['guid'])
         oc.add(EpisodeObject(url=video_url, title=video_title, show=show, summary=summary,
             thumb=Resource.ContentsOfURLWithFallback(url=thumbs, fallback=ICON)))
     
@@ -61,14 +62,3 @@ def SortImages(images=[]):
         thumb_list.append(thumb['plfile$url'])
 
     return thumb_list
-    
-####################################################################################################
-def ChooseVideoURL(videos=[]):
-    url = ''
-    for video in videos:
-        if video['plfile$format'] == "MPEG4":
-            url = video['plfile$url']
-            break
-        else:
-            continue
-    return url
