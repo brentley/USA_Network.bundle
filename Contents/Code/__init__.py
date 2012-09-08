@@ -29,7 +29,10 @@ def MainMenu():
             title = show['title']
         else:
             continue
+
         oc.add(DirectoryObject(key=Callback(EpisodesPage, title=title), title=title))
+
+    oc.objects.sort(key = lambda obj: obj.title)
 
     return oc
 
